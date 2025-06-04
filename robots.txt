@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://rafijaddin.netlify.app/sitemap.xml
