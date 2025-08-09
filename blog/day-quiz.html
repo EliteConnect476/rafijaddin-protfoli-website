@@ -1,0 +1,312 @@
+   <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Day Trading Quiz Practice</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#007bff;
+      --bg:#f9fafc;
+      --card:#fff;
+      --text:#111;
+      --muted:#666;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:'Inter',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      padding:24px;
+      display:flex;
+      justify-content:center;
+    }
+    .container{
+      width:100%;
+      max-width:860px;
+    }
+    header{
+      text-align:center;
+      margin-bottom:18px;
+    }
+    header h1{margin:0;font-size:1.6rem;color:var(--primary)}
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      box-shadow:0 6px 20px rgba(30,41,59,0.06);
+      padding:18px;
+      margin-bottom:16px;
+    }
+    .meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+    .meta button{
+      background:var(--primary);
+      color:#fff;
+      border:none;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .meta .small{color:var(--muted);font-size:0.95rem}
+    .question{
+      margin-bottom:14px;
+      padding:14px;
+      border-radius:10px;
+      border:1px solid #eee;
+      background:linear-gradient(180deg,#fff,#fbfdff);
+    }
+    .q-title{font-weight:700;margin:0 0 8px 0}
+    .options{display:flex;flex-direction:column;gap:10px}
+    .opt{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .opt input[type="radio"]{transform:scale(1.05)}
+    .actions{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:12px}
+    .actions .left{display:flex;gap:8px}
+    .btn{
+      background:var(--primary);
+      color:#fff;
+      border:none;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .btn.secondary{background:#eee;color:var(--text);font-weight:600}
+    .result{padding:14px;border-radius:10px;border:1px solid #e6f0ff;background:#f1f8ff}
+    .score{font-size:1.2rem;font-weight:700;color:var(--primary)}
+    .review {margin-top:10px}
+    .review li{margin-bottom:8px}
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:0.95rem}
+    @media (max-width:600px){body{padding:12px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Day Trading Quiz Practice</h1>
+      <p style="margin:6px 0 0;color:var(--muted)">Test quick decision-making and day trading knowledge — realtime-style questions.</p>
+    </header>
+
+    <div class="card" id="quiz-card">
+      <div class="meta">
+        <div class="small">Questions: <strong id="total">0</strong></div>
+        <div class="small">Current: <strong id="current">0</strong></div>
+        <div style="margin-left:auto">
+          <button id="restart" class="btn secondary">Restart</button>
+          <button id="shuffle" class="btn">Shuffle</button>
+        </div>
+      </div>
+
+      <div id="question-container"></div>
+
+      <div class="actions">
+        <div class="left">
+          <button id="prev" class="btn secondary">Previous</button>
+          <button id="next" class="btn">Next</button>
+        </div>
+        <div>
+          <button id="submit" class="btn">Submit Quiz</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="result-card" style="display:none">
+      <div class="result">
+        <div>Finished! Your score: <span class="score" id="score">0</span>/<span id="maxscore">0</span></div>
+        <div style="margin-top:8px;color:var(--muted)">Best score (saved locally): <strong id="best">—</strong></div>
+
+        <div class="review" id="review-area">
+          <h4 style="margin:12px 0 6px 0">Review</h4>
+          <ul id="review-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <small>Practice for learning only — not trading advice. Questions are multiple choice — change them from the code as needed.</small>
+    </footer>
+  </div>
+
+  <script>
+    /********* QUESTIONS: edit this array to add/remove/change quiz items *********/
+    const QUESTIONS = [
+      {
+        id: "q1",
+        q: "What is the most commonly used timeframe for intraday scalping?",
+        options: ["Daily (1D)", "15-minute", "5-minute", "Monthly (1M)"],
+        answerIndex: 2,
+        explanation: "Scalp traders frequently use very short intraday timeframes like 1-5 minutes; 5-minute is common."
+      },
+      {
+        id: "q2",
+        q: "If price breaks a strong support with high volume, a day trader should usually:",
+        options: ["Buy immediately", "Ignore volume and hold", "Consider short / wait for pullback", "Open a long-term position"],
+        answerIndex: 2,
+        explanation: "A break of support on high volume suggests weakness — many day traders consider shorting or waiting for a retracement."
+      },
+      {
+        id: "q3",
+        q: "Which order type executes immediately at the current market price?",
+        options: ["Limit order", "Stop-loss order", "Market order", "Good-'til-cancelled limit"],
+        answerIndex: 2,
+        explanation: "Market orders execute immediately at the best available price."
+      },
+      {
+        id: "q4",
+        q: "Risk management rule commonly recommended for intraday is:",
+        options: ["Risk 10% of capital per trade", "Risk 0.5–2% of capital per trade","Risk everything on high conviction trades","Never use stop-loss"],
+        answerIndex: 1,
+        explanation: "Many traders risk a small percent (e.g., 0.5–2%) of capital per trade to control drawdowns."
+      },
+      {
+        id: "q5",
+        q: "What does 'slippage' mean in day trading?",
+        options: ["Accidental duplicate order","Difference between expected and executed price","Brokerage fee","Chart malfunction"],
+        answerIndex: 1,
+        explanation: "Slippage is the difference between the intended execution price and the actual execution price."
+      }
+    ];
+    /***************************************************************************/
+
+    // state
+    let state = {
+      questions: [...QUESTIONS],
+      currentIndex: 0,
+      answers: {}, // id -> selected option index
+    };
+
+    // DOM
+    const totalEl = document.getElementById('total');
+    const currentEl = document.getElementById('current');
+    const qContainer = document.getElementById('question-container');
+    const resultCard = document.getElementById('result-card');
+    const scoreEl = document.getElementById('score');
+    const maxscoreEl = document.getElementById('maxscore');
+    const reviewList = document.getElementById('review-list');
+    const bestEl = document.getElementById('best');
+
+    // init
+    function init(){
+      state.questions = [...QUESTIONS];
+      totalEl.textContent = state.questions.length;
+      currentEl.textContent = 1;
+      state.currentIndex = 0;
+      state.answers = JSON.parse(localStorage.getItem('dayquiz_answers') || "{}");
+      renderCurrent();
+      loadBest();
+    }
+
+    function loadBest(){
+      const best = localStorage.getItem('dayquiz_best');
+      bestEl.textContent = best === null ? '—' : best;
+    }
+
+    function renderCurrent(){
+      const q = state.questions[state.currentIndex];
+      currentEl.textContent = state.currentIndex + 1;
+      qContainer.innerHTML = `
+        <div class="question" data-qid="${q.id}">
+          <h3 class="q-title">Q${state.currentIndex+1}. ${escapeHtml(q.q)}</h3>
+          <div class="options">
+            ${q.options.map((opt,i)=>`
+              <label class="opt">
+                <input type="radio" name="opt-${q.id}" value="${i}" ${state.answers[q.id]==i ? 'checked' : ''}>
+                <span>${escapeHtml(opt)}</span>
+              </label>
+            `).join('')}
+          </div>
+          <div style="margin-top:10px;color:var(--muted);font-size:0.95rem">Explanation will show after quiz submission.</div>
+        </div>
+      `;
+      // attach change listeners
+      qContainer.querySelectorAll('input[type="radio"]').forEach(r=>{
+        r.addEventListener('change', (e)=>{
+          const idx = parseInt(e.target.value,10);
+          state.answers[q.id] = idx;
+          localStorage.setItem('dayquiz_answers', JSON.stringify(state.answers));
+        });
+      });
+    }
+
+    // helpers
+    function escapeHtml(s){ return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    // navigation
+    document.getElementById('next').addEventListener('click', ()=>{
+      if(state.currentIndex < state.questions.length-1){
+        state.currentIndex++;
+        renderCurrent();
+      }
+    });
+    document.getElementById('prev').addEventListener('click', ()=>{
+      if(state.currentIndex > 0){
+        state.currentIndex--;
+        renderCurrent();
+      }
+    });
+    document.getElementById('restart').addEventListener('click', ()=>{
+      if(confirm('Restart quiz (this clears your answers)?')){
+        state.answers = {};
+        localStorage.removeItem('dayquiz_answers');
+        init();
+        resultCard.style.display = 'none';
+        document.getElementById('quiz-card').style.display = '';
+      }
+    });
+
+    document.getElementById('shuffle').addEventListener('click', ()=>{
+      shuffle(state.questions);
+      state.currentIndex = 0;
+      renderCurrent();
+    });
+
+    // submit
+    document.getElementById('submit').addEventListener('click', ()=>{
+      const total = state.questions.length;
+      let correct = 0;
+      reviewList.innerHTML = '';
+      state.questions.forEach((q, idx)=>{
+        const chosen = state.answers[q.id];
+        const isCorrect = chosen === q.answerIndex;
+        if(isCorrect) correct++;
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>Q${idx+1}.</strong> ${escapeHtml(q.q)}<br>
+                        Your answer: <em>${chosen === undefined ? '<span style="color:#c00">No answer</span>' : escapeHtml(q.options[chosen])}</em>
+                        ${isCorrect ? '<span style="color:green"> — Correct</span>' : '<span style="color:#c00"> — Wrong</span>'}
+                        <div style="color:var(--muted);margin-top:6px">Answer: <strong>${escapeHtml(q.options[q.answerIndex])}</strong><br>
+                        <small>${escapeHtml(q.explanation || '')}</small></div>`;
+        reviewList.appendChild(li);
+      });
+
+      scoreEl.textContent = correct;
+      maxscoreEl.textContent = total;
+      resultCard.style.display = '';
+      document.getElementById('quiz-card').style.display = 'none';
+
+      // save best
+      const best = parseInt(localStorage.getItem('dayquiz_best') || '0',10);
+      if(correct > best){
+        localStorage.setItem('dayquiz_best', correct);
+        loadBest();
+        alert('🎉 New best score! Saved locally.');
+      }
+    });
+
+    // utility functions
+    function shuffle(arr){
+      for(let i=arr.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]] = [arr[j],arr[i]];
+      }
+    }
+
+    // init
+    init();
+  </script>
+</body>
+</html>
